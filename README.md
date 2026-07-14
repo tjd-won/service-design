@@ -3,7 +3,7 @@
 서비스·경험디자인기사 **실기** 대비용 자기주도 학습 도구입니다.
 개념 이해 → 실전 문제 풀이 → 오답 암기를 **하나의 웹앱**에서 진행합니다.
 
-🔗 **바로가기:** https://tjd-won.github.io/seogyeongdi/
+🔗 **바로가기:** https://tjd-won.github.io/service-design/
 *(GitHub Pages 배포 후 실제 주소로 교체하세요)*
 
 ---
