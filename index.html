@@ -878,6 +878,10 @@ function detect(un,kw){if(!un)return false;var c=cands(kw);for(var i=0;i<c.lengt
 function qkey(si,qi){return si+'-'+qi;}
 
 let filter='전체', sfilter='all';
+// 상태 유지: iframe 리로드/재초기화돼도 필터·스크롤을 복원(모바일 웹뷰 대응)
+try{const _pf=localStorage.getItem('sxd_prob_filter'); if(_pf)filter=_pf; const _ps=localStorage.getItem('sxd_prob_sfilter'); if(_ps)sfilter=_ps;}catch(e){}
+function saveFilters(){ try{localStorage.setItem('sxd_prob_filter',filter);localStorage.setItem('sxd_prob_sfilter',sfilter);}catch(e){} }
+function restoreScroll(){ let y=0; try{y=parseInt(localStorage.getItem('sxd_prob_scroll')||'0',10)||0;}catch(e){} if(y<=0)return; const go=()=>{const h=document.documentElement,sb=h.style.scrollBehavior;h.style.scrollBehavior='auto';h.scrollTop=y;try{document.body.scrollTop=y;}catch(e){}h.style.scrollBehavior=sb;}; setTimeout(go,60); setTimeout(go,300); setTimeout(go,600); }
 const filtersEl=document.getElementById('filters'), setsEl=document.getElementById('sets');
 const stripHtml=h=>{const d=document.createElement('div');d.innerHTML=h||'';return (d.textContent||'').replace(/\s+/g,' ').trim();};
 function statusOf(si,qi){ return (store[qkey(si,qi)]||{}).grade || 'unmarked'; }
@@ -888,7 +892,7 @@ function buildSFilters(){
   const c={all:scope.length,no:scope.filter(x=>x==='no').length,part:scope.filter(x=>x==='part').length,unmarked:scope.filter(x=>x==='unmarked').length};
   sf.innerHTML='<span class=&quot;sfl&quot;>🔖 채점 상태</span>';
   [['all','전체',c.all],['no','✗ 오답',c.no],['part','△ 부분',c.part],['unmarked','미채점',c.unmarked]].forEach(([k,lab,n])=>{
-    const b=el('button',(k===sfilter?'on':''),`${lab} ${n}`); b.setAttribute('aria-pressed',k===sfilter?'true':'false'); b.onclick=()=>{sfilter=k;render();}; sf.appendChild(b);
+    const b=el('button',(k===sfilter?'on':''),`${lab} ${n}`); b.setAttribute('aria-pressed',k===sfilter?'true':'false'); b.onclick=()=>{sfilter=k;saveFilters();render();}; sf.appendChild(b);
   });
 }
 /* 문제 카테고리 → 개념 대시보드 단계(no) 매핑 */
@@ -915,7 +919,19 @@ function catToStage(cat){
 /* 관련 개념: 특정 개념 카드로 이동(용어 지정) · 드롭다운 열고닫기 */
 function gotoConcept(term){ try{ window.parent.postMessage({sxd:'goConcept',term:term},'*'); }catch(e){} }
 function closeConceptMenus(){ document.querySelectorAll('.concept-nav.open').forEach(n=>n.classList.remove('open')); }
+// 드롭다운을 position:fixed로 배치 → 카드(.setcard overflow:hidden)에 잘리지 않게, 화면 밖으로 나가면 좌/상 반전
+function positionConceptMenu(btn,menu){
+  menu.style.position='fixed'; menu.style.margin='0';
+  const r=btn.getBoundingClientRect();
+  const vw=document.documentElement.clientWidth, vh=document.documentElement.clientHeight;
+  const mw=Math.max(menu.offsetWidth,210), mh=menu.offsetHeight;
+  let left=r.left; if(left+mw>vw-8) left=Math.max(8, vw-8-mw);
+  let top=r.bottom+5; if(top+mh>vh-8 &amp;&amp; r.top-5-mh>8) top=r.top-5-mh;
+  menu.style.left=left+'px'; menu.style.top=top+'px';
+}
 document.addEventListener('click',closeConceptMenus);
+addEventListener('scroll',closeConceptMenus,{passive:true,capture:true});
+addEventListener('resize',closeConceptMenus);
 
 function buildFilters(){
   const srcs=['전체',...[...new Set(SETS.map(s=>s.source))]];
@@ -923,7 +939,7 @@ function buildFilters(){
   srcs.forEach(k=>{
     const cnt=k==='전체'?SETS.reduce((a,s)=>a+s.questions.length,0):SETS.filter(s=>s.source===k).reduce((a,s)=>a+s.questions.length,0);
     const b=el('button',(k===filter?'on':''),`${k==='전체'?'전체':SRC[k]?.label||k} ${cnt}`);
-    b.onclick=()=>{filter=k;buildFilters();render();}; filtersEl.appendChild(b);
+    b.onclick=()=>{filter=k;saveFilters();buildFilters();render();}; filtersEl.appendChild(b);
   });
 }
 /* 시각자료를 카드 폭에 맞춤: 딱 맞으면 원본 크기, 넘치면 비율대로 축소(가독 하한 0.58, 그 아래에선 스크롤 허용) → 한눈에 표시 */
@@ -997,7 +1013,7 @@ function render(){
           const b=el('button','concept-link'); b.type='button'; b.innerHTML=`📖 관련 개념 (${cList.length}) <span class=&quot;cl-caret&quot;>▾</span>`;
           const menu=el('div','concept-menu',`<div class=&quot;cm-h&quot;>이 문제 관련 개념 · 클릭해 이동</div>`);
           cList.forEach(t=>{ const it=el('button','cm-item'); it.type='button'; it.textContent=t; it.onclick=(ev)=>{ ev.stopPropagation(); closeConceptMenus(); gotoConcept(t); }; menu.appendChild(it); });
-          b.onclick=(ev)=>{ ev.stopPropagation(); const open=nav.classList.contains('open'); closeConceptMenus(); if(!open) nav.classList.add('open'); };
+          b.onclick=(ev)=>{ ev.stopPropagation(); const wasOpen=nav.classList.contains('open'); closeConceptMenus(); if(!wasOpen){ nav.classList.add('open'); positionConceptMenu(b,menu); } };
           nav.appendChild(b); nav.appendChild(menu);
         }
         row.insertBefore(nav, qsEl);
@@ -1028,6 +1044,7 @@ function render(){
       }
       row.querySelector('.grade-btn').onclick=grade;
       renderLabel();
+      if((store[key]||{}).grade){ grade(); } // 이미 채점한 문제는 렌더 시 채점 결과를 펼친 상태로 복원
       body.appendChild(qd);
     });
     card.appendChild(body); setsEl.appendChild(card);
@@ -1048,6 +1065,11 @@ function updateTot(){
 }
 try{ if(window.self!==window.top) document.body.classList.add('embedded'); }catch(e){ document.body.classList.add('embedded'); }
 buildFilters(); render();
+restoreScroll();
+// 스크롤 위치 저장(디바운스)
+(function(){ let _st; addEventListener('scroll',()=>{ clearTimeout(_st); _st=setTimeout(()=>{ try{localStorage.setItem('sxd_prob_scroll', String(document.documentElement.scrollTop||document.body.scrollTop||0));}catch(e){} },160); },{passive:true}); })();
+// 셸이 탭을 다시 보여줄 때(리로드 없이 스크롤만 초기화되는 웹뷰 대비) 스크롤 복원
+addEventListener('message',function(e){ const d=e.data; if(d&amp;&amp;d.sxd==='shown') restoreScroll(); });
 </script>
 </body>
 </html>
@@ -1488,6 +1510,7 @@ buildFilters(); buildDeck(); render();
     if(k==='home'){ renderHome(); loadingEl.style.display='none'; }
     else if(!loaded[k]){ loadingEl.style.display='flex'; const f=frames[k]; f.srcdoc=f.getAttribute('data-srcdoc'); f.removeAttribute('data-srcdoc'); loaded[k]='loading'; f.addEventListener('load',()=>{loaded[k]='done'; if(f.classList.contains('show'))loadingEl.style.display='none';},{once:true}); }
     else loadingEl.style.display=(loaded[k]==='done')?'none':'flex';
+    if(frames[k]&&loaded[k]==='done'){ const fw=frames[k].contentWindow; const ping=()=>{try{fw.postMessage({sxd:'shown'},'*');}catch(_){}}; ping(); setTimeout(ping,240); }
     try{localStorage.setItem('sxd_tab',k)}catch(e){}
   }
   tabs.forEach(t=>t.onclick=()=>show(t.dataset.tab));
