@@ -153,10 +153,11 @@
   tabs.forEach(t=>t.onclick=()=>show(t.dataset.tab));
   // 실전 문제 → 관련 개념: 개념 탭 전환 + 해당 단계로 스크롤 릴레이
   window.addEventListener('message',function(e){
-    const d=e.data; if(!d||d.sxd!=='goConcept'||!d.stage) return;
+    const d=e.data; if(!d||d.sxd!=='goConcept'||(!d.term&&!d.stage)) return;
     show('concept');
     const f=frames.concept;
-    const relay=()=>{ try{ f.contentWindow.postMessage({sxd:'scrollToStage',stage:d.stage},'*'); }catch(_){} };
+    const msg=d.term?{sxd:'scrollToConcept',term:d.term}:{sxd:'scrollToStage',stage:d.stage};
+    const relay=()=>{ try{ f.contentWindow.postMessage(msg,'*'); }catch(_){} };
     if(loaded.concept==='done') setTimeout(relay,90); else f.addEventListener('load',()=>setTimeout(relay,150),{once:true});
   });
   let init='home'; try{init=localStorage.getItem('sxd_tab')||'home'}catch(e){}

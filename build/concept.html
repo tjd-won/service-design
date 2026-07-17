@@ -108,6 +108,8 @@
   .crit ul{margin:0;padding-left:17px}.crit li{font-size:13px;color:var(--t2);margin:2px 0;max-width:72ch}
 
   .concept{border:1px solid var(--line);border-radius:13px;padding:13px 15px;margin:9px 0;background:#fff;scroll-margin-top:72px}
+  @keyframes jumpHl{0%,32%{background:#e7f0ff;box-shadow:0 0 0 3px rgba(49,130,246,.35)}100%{background:#fff;box-shadow:0 0 0 0 rgba(49,130,246,0)}}
+  .concept.jump-hl{outline:2.5px solid #3182f6;outline-offset:2px;animation:jumpHl 2.4s ease-out}
   .concept:target{box-shadow:0 0 0 2px var(--blue)}
   .c-top{display:flex;align-items:flex-start;gap:8px}
   .c-main{flex:1;min-width:0}
@@ -590,6 +592,21 @@ window.addEventListener('message',function(e){
     try{ el.scrollIntoView({block:'start'}); }catch(_){} h.style.scrollBehavior=sb; tries++;
     if(tries<10 && Math.abs(el.getBoundingClientRect().top) > 120) setTimeout(go,130); };
   setTimeout(go,60);
+});
+// 실전 문제 탭에서 온 '관련 개념(개별)' 이동 → 해당 개념 카드로 정밀 스크롤 + 하이라이트
+window.addEventListener('message',function(e){
+  const d=e.data; if(!d||d.sxd!=='scrollToConcept'||!d.term) return;
+  const id=termIndex[slug(d.term)]; if(!id) return;
+  const el=document.getElementById(id); if(!el) return;
+  // 범위/검색/접힘 필터로 숨겨졌으면 대상만 강제로 보이게
+  el.classList.remove('collapsed','fold','hide-q','hide-tf','scope-hidden');
+  const sec=el.closest('section.stage'); if(sec) sec.classList.remove('collapsed','hide-q','hide-tf','scope-hidden');
+  // smooth 끄고 즉시 이동, 레이아웃 정착까지 다중 패스(개념 카드엔 scroll-margin-top:72px가 있어 고정헤더 아래로 착지)
+  const pass=()=>{ const h=document.documentElement, sb=h.style.scrollBehavior; h.style.scrollBehavior='auto';
+    try{ el.scrollIntoView({block:'start'}); }catch(_){} h.style.scrollBehavior=sb; };
+  setTimeout(pass,50); setTimeout(pass,210); setTimeout(pass,430);
+  // 잠깐 하이라이트
+  el.classList.add('jump-hl'); clearTimeout(el._hl); el._hl=setTimeout(()=>el.classList.remove('jump-hl'),2600);
 });
 // d-day
 (function(){try{var exam=new Date(2026,6,25),now=new Date();var d=Math.ceil((exam-new Date(now.getFullYear(),now.getMonth(),now.getDate()))/864e5);document.getElementById('dd').textContent=d>0?('실기 D-'+d):(d===0?'실기 D-DAY':'실기');}catch(e){}})();
