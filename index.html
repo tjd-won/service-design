@@ -523,6 +523,37 @@ function build(){
     secWrap.appendChild(sec);
   });
   updateProgress();
+  fitAllFigures();
+}
+/* 시각 예시를 카드 폭에 맞춤: 딱 맞으면 원본, 넘치면 비율 축소(가독 하한 0.58, 그 아래에선 스크롤) → 한눈에 표시 */
+const __figRO=(typeof ResizeObserver!=='undefined')?new ResizeObserver(es=>{for(const e of es)fitFig(e.target);}):null;
+let __figResizeBound=false;
+function fitFig(w){
+  const avail=w.clientWidth; if(avail<=1) return;
+  const el=w.firstElementChild; if(!el) return;
+  if(w.__lw===avail) return; w.__lw=avail;
+  const nodes=[el,...el.querySelectorAll('*')];
+  nodes.forEach(n=>{ if(n.__ox===undefined) n.__ox=(n.style&amp;&amp;n.style.overflowX)||''; n.style.overflowX=n.__ox; });
+  el.style.transformOrigin='top left'; el.style.transform='none';
+  w.style.overflowX=''; w.style.height='';
+  let nat=el.scrollWidth; nodes.forEach(n=>{ const sw=n.scrollWidth; if(sw>nat)nat=sw; });
+  nodes.forEach(n=>{ if(n.__ox==='auto'||n.__ox==='scroll') n.style.overflowX='visible'; });
+  const s=avail/nat;
+  if(nat>avail+1 &amp;&amp; s>=0.66){
+    el.style.transform='scale('+s+')';
+    w.style.overflowX='hidden';
+    w.style.height=Math.ceil(el.scrollHeight*s)+'px';
+  } else if(nat>avail+1){
+    w.style.overflowX='auto';
+  } else {
+    w.style.overflowX='hidden';
+  }
+}
+function fitAllFigures(){
+  const ws=document.querySelectorAll('.c-figwrap');
+  if(__figRO){ ws.forEach(w=>__figRO.observe(w)); return; }
+  ws.forEach(fitFig);
+  if(!__figResizeBound){ __figResizeBound=true; window.addEventListener('resize',()=>{document.querySelectorAll('.c-figwrap').forEach(w=>{w.__lw=-1;fitFig(w);});}); }
 }
 
 function updateProgress(){
@@ -895,6 +926,41 @@ function buildFilters(){
     b.onclick=()=>{filter=k;buildFilters();render();}; filtersEl.appendChild(b);
   });
 }
+/* 시각자료를 카드 폭에 맞춤: 딱 맞으면 원본 크기, 넘치면 비율대로 축소(가독 하한 0.58, 그 아래에선 스크롤 허용) → 한눈에 표시 */
+const __figRO=(typeof ResizeObserver!=='undefined')?new ResizeObserver(es=>{for(const e of es)fitFig(e.target);}):null;
+let __figResizeBound=false;
+function fitFig(w){
+  const avail=w.clientWidth; if(avail<=1) return;
+  const el=w.firstElementChild; if(!el) return;
+  if(w.__lw===avail) return; w.__lw=avail;
+  const nodes=[el,...el.querySelectorAll('*')];
+  // 원래 인라인 overflow-x를 1회 기억하고 복원(중첩 스크롤러의 실제 콘텐츠 폭 측정용)
+  nodes.forEach(n=>{ if(n.__ox===undefined) n.__ox=(n.style&amp;&amp;n.style.overflowX)||''; n.style.overflowX=n.__ox; });
+  el.style.transformOrigin='top left'; el.style.transform='none';
+  w.style.overflowX=''; w.style.height='';
+  // 진짜 콘텐츠 폭 = 자신+모든 자손 scrollWidth 중 최댓값(중첩 overflow 스크롤러 포함)
+  let nat=el.scrollWidth; nodes.forEach(n=>{ const sw=n.scrollWidth; if(sw>nat)nat=sw; });
+  // 내부 가로 스크롤러는 모두 해제 → 스크롤은 wrap 한 곳에서만(경계 2px 스크롤 방지)
+  nodes.forEach(n=>{ if(n.__ox==='auto'||n.__ox==='scroll') n.style.overflowX='visible'; });
+  const s=avail/nat;
+  if(nat>avail+1 &amp;&amp; s>=0.66){
+    // 폭 안에 다 들어가면서 가독 유지 → 바깥에서 비율 축소(한눈에 표시)
+    el.style.transform='scale('+s+')';
+    w.style.overflowX='hidden';
+    w.style.height=Math.ceil(el.scrollHeight*s)+'px';
+  } else if(nat>avail+1){
+    // 축소율<0.66인 좁은 화면: 원본 크기 유지, wrap에서 가로 스크롤(가독 보존)
+    w.style.overflowX='auto';
+  } else {
+    w.style.overflowX='hidden';
+  }
+}
+function fitAllFigures(){
+  const ws=document.querySelectorAll('.figwrap');
+  if(__figRO){ ws.forEach(w=>__figRO.observe(w)); return; }
+  ws.forEach(fitFig);
+  if(!__figResizeBound){ __figResizeBound=true; window.addEventListener('resize',()=>{document.querySelectorAll('.figwrap').forEach(w=>{w.__lw=-1;fitFig(w);});}); }
+}
 function render(){
   setsEl.innerHTML='';
   SETS.forEach((set,si)=>{
@@ -967,6 +1033,7 @@ function render(){
     card.appendChild(body); setsEl.appendChild(card);
   });
   updateTot();
+  fitAllFigures();
 }
 function updateTot(){
   let graded=0,pts=0,tot=0;

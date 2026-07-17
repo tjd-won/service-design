@@ -447,6 +447,37 @@ function build(){
     secWrap.appendChild(sec);
   });
   updateProgress();
+  fitAllFigures();
+}
+/* 시각 예시를 카드 폭에 맞춤: 딱 맞으면 원본, 넘치면 비율 축소(가독 하한 0.58, 그 아래에선 스크롤) → 한눈에 표시 */
+const __figRO=(typeof ResizeObserver!=='undefined')?new ResizeObserver(es=>{for(const e of es)fitFig(e.target);}):null;
+let __figResizeBound=false;
+function fitFig(w){
+  const avail=w.clientWidth; if(avail<=1) return;
+  const el=w.firstElementChild; if(!el) return;
+  if(w.__lw===avail) return; w.__lw=avail;
+  const nodes=[el,...el.querySelectorAll('*')];
+  nodes.forEach(n=>{ if(n.__ox===undefined) n.__ox=(n.style&&n.style.overflowX)||''; n.style.overflowX=n.__ox; });
+  el.style.transformOrigin='top left'; el.style.transform='none';
+  w.style.overflowX=''; w.style.height='';
+  let nat=el.scrollWidth; nodes.forEach(n=>{ const sw=n.scrollWidth; if(sw>nat)nat=sw; });
+  nodes.forEach(n=>{ if(n.__ox==='auto'||n.__ox==='scroll') n.style.overflowX='visible'; });
+  const s=avail/nat;
+  if(nat>avail+1 && s>=0.66){
+    el.style.transform='scale('+s+')';
+    w.style.overflowX='hidden';
+    w.style.height=Math.ceil(el.scrollHeight*s)+'px';
+  } else if(nat>avail+1){
+    w.style.overflowX='auto';
+  } else {
+    w.style.overflowX='hidden';
+  }
+}
+function fitAllFigures(){
+  const ws=document.querySelectorAll('.c-figwrap');
+  if(__figRO){ ws.forEach(w=>__figRO.observe(w)); return; }
+  ws.forEach(fitFig);
+  if(!__figResizeBound){ __figResizeBound=true; window.addEventListener('resize',()=>{document.querySelectorAll('.c-figwrap').forEach(w=>{w.__lw=-1;fitFig(w);});}); }
 }
 
 function updateProgress(){
