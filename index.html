@@ -337,6 +337,9 @@ const DATA = [{&quot;no&quot;: &quot;00&quot;, &quot;title&quot;: &quot;기초·
 const LS='sxd_dash_v1';
 let store={states:{},marks:{}}; try{store=Object.assign(store,JSON.parse(localStorage.getItem(LS))||{})}catch(e){}
 function save(){try{localStorage.setItem(LS,JSON.stringify(store))}catch(e){}}
+// UI 상태(뷰 모드·범위/상태 필터·섹션접기·카드접기) 지속 — 학습 데이터(store)와 분리 저장
+const CUI_KEY='sxd_concept_ui_v1'; let cui={}; try{cui=JSON.parse(localStorage.getItem(CUI_KEY))||{}}catch(e){}
+function saveCui(){try{localStorage.setItem(CUI_KEY,JSON.stringify(cui))}catch(e){}}
 
 const el=(t,c,h)=>{const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e;};
 const esc=s=>(s==null?'':String(s)).replace(/&amp;/g,'&amp;amp;').replace(/</g,'&amp;lt;').replace(/>/g,'&amp;gt;');
@@ -444,7 +447,7 @@ function build(){
     const head=el('div','st-head');
     head.innerHTML=`<div class=&quot;st-no&quot;>${esc(d.no)}</div><div class=&quot;st-titles&quot;><h2>${esc(d.title)}</h2><div class=&quot;full&quot;>${esc(d.fullTitle)} · ${PHASES[d.phase]?.label||d.phase}</div></div>
       <div class=&quot;st-meta&quot;><span class=&quot;st-prog&quot; data-sprog=&quot;${d.no}&quot;></span><span class=&quot;st-caret&quot;>▾</span></div>`;
-    head.onclick=e=>{ sec.classList.toggle('collapsed'); };
+    head.onclick=e=>{ const col=sec.classList.toggle('collapsed'); const no=d.no; cui.collapsedStages=(cui.collapsedStages||[]).filter(x=>x!==no); if(col)cui.collapsedStages.push(no); saveCui(); };
     sec.appendChild(head);
     const body=el('div','st-body');
     if(d.overview) body.appendChild(el('p','ov',fmt(d.overview)));
@@ -485,7 +488,7 @@ function build(){
         if(c.figure){ bd.appendChild(el('div','c-figbox',`<span class=&quot;c-fig-label&quot;>📊 시각 예시</span><div class=&quot;c-figwrap&quot;>${c.figure}</div>`)); }
         card.appendChild(bd);
         // interactions
-        top.querySelector('.c-term').onclick=()=>{ if(document.body.classList.contains('hide-def')){card.classList.toggle('revealed');} else {card.classList.toggle('fold');} };
+        top.querySelector('.c-term').onclick=()=>{ if(document.body.classList.contains('hide-def')){card.classList.toggle('revealed');} else {const f=card.classList.toggle('fold'); cui.foldedConcepts=(cui.foldedConcepts||[]).filter(x=>x!==card.id); if(f)cui.foldedConcepts.push(card.id); saveCui();} };
         top.querySelectorAll('.cbtn').forEach(btn=>btn.onclick=e=>{e.stopPropagation();
           const act=btn.dataset.act;
           if(act==='star'){ store.marks[key]=!store.marks[key]; if(!store.marks[key])delete store.marks[key]; btn.classList.toggle('on',!!store.marks[key]); }
@@ -593,7 +596,7 @@ build();
   }
   sf.querySelectorAll('button').forEach(b=>b.onclick=()=>{
     sf.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
-    applyScope(b.dataset.scope);
+    applyScope(b.dataset.scope); cui.scope=b.dataset.scope; saveCui();
   });
 })();
 
@@ -638,12 +641,13 @@ document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>{
   if(m==='core')document.body.classList.add('mode-core');
   else if(m==='term')document.body.classList.add('mode-term');
   else if(m==='recall')document.body.classList.add('hide-def');
+  cui.mode=m; saveCui();
 });
 
 // ===== TOC filters =====
 document.querySelectorAll('.tf').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('.tf').forEach(x=>{x.classList.remove('on');x.setAttribute('aria-pressed','false');}); b.classList.add('on'); b.setAttribute('aria-pressed','true');
-  const f=b.dataset.filter;
+  const f=b.dataset.filter; cui.tf=f; saveCui();
   document.querySelectorAll('.concept').forEach(c=>{
     const key=c.dataset.key;
     let show=true;
@@ -657,6 +661,15 @@ document.querySelectorAll('.tf').forEach(b=>b.onclick=()=>{
     if(f!=='all'&amp;&amp;any)sec.classList.remove('collapsed');
   });
 });
+
+// ===== UI 상태 복원(모드·범위·상태필터·섹션접기·카드접기) — 재접속/리로드 시 =====
+(function restoreCui(){ try{
+  if(cui.mode&amp;&amp;cui.mode!=='all'){ const b=document.querySelector('#modes button[data-mode=&quot;'+cui.mode+'&quot;]'); if(b)b.click(); }
+  if(cui.scope&amp;&amp;cui.scope!=='all'){ const b=document.querySelector('#scopefilter button[data-scope=&quot;'+cui.scope+'&quot;]'); if(b)b.click(); }
+  if(cui.tf&amp;&amp;cui.tf!=='all'){ const b=document.querySelector('.tf[data-filter=&quot;'+cui.tf+'&quot;]'); if(b)b.click(); }
+  (cui.collapsedStages||[]).forEach(no=>{ const s=document.getElementById('s-'+no); if(s)s.classList.add('collapsed'); });
+  (cui.foldedConcepts||[]).forEach(id=>{ const c=document.getElementById(id); if(c)c.classList.add('fold'); });
+}catch(e){} })();
 
 // ===== scrollspy (stage + concept) =====
 const stLinks={}; document.querySelectorAll('.toc .st-link').forEach(a=>stLinks[a.dataset.no]=a);
@@ -998,19 +1011,17 @@ function render(){
       qd.innerHTML=`<div class=&quot;q-head&quot;><span class=&quot;q-no&quot;>${esc(q.qno||('문'+(qi+1)))}</span>${badges}</div><div class=&quot;q-body&quot;>${q.question||''}</div>`;
       const ta=el('textarea','myans'); ta.placeholder='여기에 답안을 작성하세요…'; if(saved.text)ta.value=saved.text;
       let _t; ta.addEventListener('input',()=>{ clearTimeout(_t); _t=setTimeout(()=>{ store[key]=store[key]||{}; store[key].text=ta.value; save(); },350); });
+      ta.addEventListener('blur',()=>{ clearTimeout(_t); store[key]=store[key]||{}; store[key].text=ta.value; save(); });
       qd.appendChild(ta);
       const row=el('div','ab-row',`<button class=&quot;grade-btn&quot; type=&quot;button&quot;>채점하기</button><span class=&quot;qscore&quot; data-qs style=&quot;display:none&quot;></span>`);
       const qsEl=row.querySelector('[data-qs]');
       const cList=(set.concepts&amp;&amp;set.concepts.length)?set.concepts:null;
       if(cList){
         const nav=el('span','concept-nav');
-        if(cList.length===1){
-          const t=cList[0];
-          const b=el('button','concept-link'); b.type='button'; b.innerHTML=`📖 <span class=&quot;cl-t&quot;>${esc(t)}</span>`; b.title='관련 개념: '+t;
-          b.onclick=(ev)=>{ ev.stopPropagation(); gotoConcept(t); };
-          nav.appendChild(b);
-        } else {
-          const b=el('button','concept-link'); b.type='button'; b.innerHTML=`📖 관련 개념 (${cList.length}) <span class=&quot;cl-caret&quot;>▾</span>`;
+        {
+          // 개념이 1개여도 드롭다운으로 감춰서 표시(정답이 개념명 자체인 문제의 스포일러 방지)
+          const n=cList.length;
+          const b=el('button','concept-link'); b.type='button'; b.innerHTML=`📖 관련 개념${n>1?` (${n})`:''} <span class=&quot;cl-caret&quot;>▾</span>`;
           const menu=el('div','concept-menu',`<div class=&quot;cm-h&quot;>이 문제 관련 개념 · 클릭해 이동</div>`);
           cList.forEach(t=>{ const it=el('button','cm-item'); it.type='button'; it.textContent=t; it.onclick=(ev)=>{ ev.stopPropagation(); closeConceptMenus(); gotoConcept(t); }; menu.appendChild(it); });
           b.onclick=(ev)=>{ ev.stopPropagation(); const wasOpen=nav.classList.contains('open'); closeConceptMenus(); if(!wasOpen){ nav.classList.add('open'); positionConceptMenu(b,menu); } };
@@ -1030,21 +1041,22 @@ function render(){
         store[key]=store[key]||{}; store[key].text=ta.value; save();
         const un=norm(ta.value); const kws=q.keywords||[]; let html='';
         if(kws.length){ html+=`<div class=&quot;fb-title&quot;>핵심 키워드 자동 감지 <span class=&quot;fb-note&quot;>(맞으면 클릭해 켜고 끄기)</span></div><div class=&quot;fb-kw&quot;>`;
-          kws.forEach(kw=>{const h=detect(un,kw);html+=`<span class=&quot;kw ${h?'hit':'miss'}&quot;>${h?'✓ ':''}${esc(kw)}</span>`;});
+          const _ov=(store[key]&amp;&amp;store[key].kw)||{};
+          kws.forEach(kw=>{const auto=detect(un,kw);const h=(kw in _ov)?_ov[kw]:auto;html+=`<span class=&quot;kw ${h?'hit':'miss'}&quot;>${h?'✓ ':''}${esc(kw)}</span>`;});
           html+='</div><div class=&quot;fb-cov&quot;></div>';
         } else html+='<div class=&quot;fb-title&quot;>모범답안과 비교해 스스로 채점하세요.</div>';
         html+=`<div class=&quot;ans-model&quot;><span class=&quot;ml&quot;>📗 모범답안</span>${q.modelAnswer||''}</div>`;
         html+=`<div class=&quot;selfscore&quot;><span class=&quot;ss-label&quot;>내 채점:</span><button class=&quot;sbtn ok&quot; data-g=&quot;ok&quot;>정답 ○</button><button class=&quot;sbtn part&quot; data-g=&quot;part&quot;>부분 △</button><button class=&quot;sbtn no&quot; data-g=&quot;no&quot;>오답 ✗</button></div>`;
         fb.innerHTML=html; fb.style.display='block'; recount();
-        fb.querySelectorAll('.kw').forEach(chip=>chip.onclick=()=>{const hit=chip.classList.toggle('hit');chip.classList.toggle('miss',!hit);chip.textContent=(hit?'✓ ':'')+chip.textContent.replace(/^✓\s*/,'');recount();});
+        fb.querySelectorAll('.kw').forEach(chip=>chip.onclick=()=>{const hit=chip.classList.toggle('hit');chip.classList.toggle('miss',!hit);const kwText=chip.textContent.replace(/^✓\s*/,'').trim();chip.textContent=(hit?'✓ ':'')+kwText;store[key]=store[key]||{};store[key].kw=store[key].kw||{};store[key].kw[kwText]=hit;save();recount();});
         fb.querySelectorAll('.sbtn').forEach(sb=>sb.onclick=()=>{store[key]=store[key]||{};store[key].text=ta.value;store[key].grade=sb.dataset.g;save();
           fb.querySelectorAll('.sbtn').forEach(x=>x.classList.remove('on'));sb.classList.add('on');renderLabel();updateTot();});
         const g=(store[key]||{}).grade; if(g){const pb=fb.querySelector(`.sbtn[data-g=&quot;${g}&quot;]`);if(pb)pb.classList.add('on');}
         renderLabel();
       }
-      row.querySelector('.grade-btn').onclick=grade;
+      row.querySelector('.grade-btn').onclick=()=>{ store[key]=store[key]||{}; store[key].open=true; save(); grade(); };
       renderLabel();
-      if((store[key]||{}).grade){ grade(); } // 이미 채점한 문제는 렌더 시 채점 결과를 펼친 상태로 복원
+      if((store[key]||{}).grade||(store[key]||{}).open){ grade(); } // 채점했거나 '채점하기'로 펼쳐둔 문제는 렌더 시 펼친 상태로 복원
       body.appendChild(qd);
     });
     card.appendChild(body); setsEl.appendChild(card);
