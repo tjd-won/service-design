@@ -650,6 +650,18 @@ document.addEventListener('click',function(e){
   const el=document.getElementById(id);
   if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
 });
+// 실전 문제 탭에서 온 '관련 개념' 이동 요청 → 해당 단계 펼치고 스크롤
+window.addEventListener('message',function(e){
+  const d=e.data; if(!d||d.sxd!=='scrollToStage'||!d.stage) return;
+  const el=document.getElementById('s-'+d.stage); if(!el) return;
+  el.classList.remove('collapsed','hide-q','hide-tf','scope-hidden');
+  // smooth 끄고 즉시 이동 + 지연로드 직후 레이아웃 미정착 대비 '상단 도달까지' 재시도
+  let tries=0;
+  const go=()=>{ const h=document.documentElement, sb=h.style.scrollBehavior; h.style.scrollBehavior='auto';
+    try{ el.scrollIntoView({block:'start'}); }catch(_){} h.style.scrollBehavior=sb; tries++;
+    if(tries<10 &amp;&amp; Math.abs(el.getBoundingClientRect().top) > 120) setTimeout(go,130); };
+  setTimeout(go,60);
+});
 // d-day
 (function(){try{var exam=new Date(2026,6,25),now=new Date();var d=Math.ceil((exam-new Date(now.getFullYear(),now.getMonth(),now.getDate()))/864e5);document.getElementById('dd').textContent=d>0?('실기 D-'+d):(d===0?'실기 D-DAY':'실기');}catch(e){}})();
 </script>
@@ -733,6 +745,9 @@ document.addEventListener('click',function(e){
   .myans:focus{outline:none;border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px var(--blue-soft)}
   .ab-row{display:flex;align-items:center;gap:9px;margin-top:8px;flex-wrap:wrap}
   .grade-btn{border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:13.5px;color:#fff;background:var(--blue);padding:9px 16px;border-radius:10px}
+  .concept-link{border:1.5px solid var(--blue);background:var(--blue-soft);color:var(--blue-dk);cursor:pointer;font-family:inherit;font-weight:800;font-size:13px;padding:8px 13px;border-radius:10px}
+  .concept-link:hover{background:#dbeafe}
+  .concept-link:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
   .grade-btn:hover{background:var(--blue-dk)}
   .qscore{font-size:12px;font-weight:800;padding:5px 10px;border-radius:999px}
   .qscore.ok{background:var(--good-soft);color:var(--good)}.qscore.part{background:var(--amber-soft);color:var(--amber)}.qscore.no{background:var(--mark-soft);color:var(--mark)}
@@ -808,16 +823,26 @@ function buildSFilters(){
   [['all','전체',c.all],['no','✗ 오답',c.no],['part','△ 부분',c.part],['unmarked','미채점',c.unmarked]].forEach(([k,lab,n])=>{
     const b=el('button',(k===sfilter?'on':''),`${lab} ${n}`); b.setAttribute('aria-pressed',k===sfilter?'true':'false'); b.onclick=()=>{sfilter=k;render();}; sf.appendChild(b);
   });
-  let gWrong=0; SETS.forEach((s,si)=>s.questions.forEach((q,qi)=>{const g=statusOf(si,qi); if(g==='no'||g==='part')gWrong++;}));
-  const sb=el('button','send',`📤 오답·부분(${gWrong}) → 암기드릴`); sb.onclick=sendToDrill; sf.appendChild(sb);
 }
-function sendToDrill(){
-  const cards=[];
-  SETS.forEach((s,si)=>s.questions.forEach((q,qi)=>{ const g=statusOf(si,qi); if(g==='no'||g==='part'){
-    cards.push({c:'오답',q:(s.title?'['+s.title+'] ':'')+stripHtml(q.question).slice(0,110),a:q.modelAnswer||''});
-  }}));
-  if(!cards.length){ alert('먼저 오답(✗)·부분(△)으로 채점한 문제가 있어야 해요.'); return; }
-  try{ localStorage.setItem('sxd_drill_extra',JSON.stringify(cards)); alert(cards.length+'개 문제를 암기 드릴의 &quot;오답&quot; 카테고리로 보냈어요. 암기 드릴 탭에서 바로 확인할 수 있어요.'); }catch(e){ alert('저장에 실패했어요.'); }
+/* 문제 카테고리 → 개념 대시보드 단계(no) 매핑 */
+function catToStage(cat){
+  const c=(cat||'').toLowerCase();
+  const M=[['과제분석','01'],['프로젝트 관리','01'],['pert','01'],['간트','01'],['요구사항 정의','06'],['요구사항','01'],['견적','01'],['제안요청','01'],['기획','01'],
+   ['환경','02'],['데스크','02'],['swot','02'],['pest','02'],
+   ['관찰','03'],['섀도','03'],
+   ['면접','04'],['설문','04'],['fgi','04'],['인터뷰','04'],
+   ['페르소나','05'],['여정','05'],['이해관계자','05'],['대상분석','05'],
+   ['문제정의','06'],['문제 정의','06'],['친화도','06'],['원칙','06'],['콘셉트','06'],['기회','06'],
+   ['아이데이','07'],['아이디어','07'],['워크숍','07'],['공동창작','07'],['구조화','07'],['터치포인트','07'],['프로세스','07'],
+   ['프로토타입','08'],['mvp','08'],
+   ['시나리오','09'],['스토리보드','09'],
+   ['모델·운영','10'],['결과물','10'],['블루프린트','10'],['청사진','10'],['모델 개발','10'],['모델개발','10'],['bmc','10'],['카노','10'],['제안','10'],['종합','10'],
+   ['완료보고','11'],['프레젠','11'],['인포그래픽','11'],
+   ['자료화','12'],['형상','12'],['산출물','12'],['데이터베이스','12'],
+   ['운영방안','13'],['유지보수','13'],['사후','13'],['지식재산','13'],['servqual','13'],['서비스품질','13'],['tbl','13'],['권리','13'],
+   ['분석','05'],['전략','05'],['리서치','03'],['운영','13']];
+  for(const kv of M){ if(c.indexOf(kv[0])>=0) return kv[1]; }
+  return null;
 }
 
 function buildFilters(){
@@ -850,7 +875,9 @@ function render(){
       const ta=el('textarea','myans'); ta.placeholder='여기에 답안을 작성하세요…'; if(saved.text)ta.value=saved.text;
       let _t; ta.addEventListener('input',()=>{ clearTimeout(_t); _t=setTimeout(()=>{ store[key]=store[key]||{}; store[key].text=ta.value; save(); },350); });
       qd.appendChild(ta);
-      const row=el('div','ab-row',`<button class=&quot;grade-btn&quot; type=&quot;button&quot;>채점하기</button><span class=&quot;qscore&quot; data-qs style=&quot;display:none&quot;></span>`);
+      const stg=catToStage(set.category);
+      const row=el('div','ab-row',`<button class=&quot;grade-btn&quot; type=&quot;button&quot;>채점하기</button>${stg?`<button class=&quot;concept-link&quot; type=&quot;button&quot;>📖 관련 개념</button>`:''}<span class=&quot;qscore&quot; data-qs style=&quot;display:none&quot;></span>`);
+      if(stg){ row.querySelector('.concept-link').onclick=()=>{ try{ window.parent.postMessage({sxd:'goConcept',stage:stg},'*'); }catch(e){} }; }
       qd.appendChild(row);
       const fb=el('div','fb'); qd.appendChild(fb);
       const scoreEl=row.querySelector('[data-qs]');
@@ -1118,15 +1145,6 @@ const CARDS = [
  {c:&quot;모델&quot;,q:&quot;<b>간트차트</b>의 단점은?&quot;,a:&quot;작업 간 <b>선후·의존관계</b> 표현 약함 · 지연 시 <b>연쇄 영향 갱신</b> 번거로움 → PERT/CPM으로 보완&quot;},
 ];
 
-/* 문제 탭에서 보낸 오답·부분 문제를 '오답' 카드로 병합 */
-function loadExtraCards(){
-  for(let i=CARDS.length-1;i>=0;i--){ if(CARDS[i]&amp;&amp;CARDS[i].c==='오답') CARDS.splice(i,1); }
-  try{ const ex=JSON.parse(localStorage.getItem('sxd_drill_extra')||'[]');
-    if(Array.isArray(ex)) ex.forEach(c=>CARDS.push({c:'오답',q:String(c.q||''),a:String(c.a||'')}));
-  }catch(e){}
-}
-loadExtraCards();
-
 /* ===== 상태 ===== */
 const KEY=&quot;seogyeongdi_drill_v1&quot;;
 let state = load();
@@ -1267,8 +1285,6 @@ document.addEventListener(&quot;keydown&quot;,e=>{
 /* init */
 try{ if(window.self!==window.top) document.body.classList.add('embedded'); }catch(e){ document.body.classList.add('embedded'); }
 buildFilters(); buildDeck(); render();
-/* 문제 탭에서 오답 전송 시 실시간 반영 */
-window.addEventListener('storage',e=>{ if(e.key==='sxd_drill_extra'){ const p=pos; loadExtraCards(); if(!CATS().includes(filter))filter='전체'; buildFilters(); buildDeck(); if(p<deck.length)pos=p; render(); } });
 </script>
 </body>
 </html>
@@ -1347,6 +1363,14 @@ window.addEventListener('storage',e=>{ if(e.key==='sxd_drill_extra'){ const p=po
     try{localStorage.setItem('sxd_tab',k)}catch(e){}
   }
   tabs.forEach(t=>t.onclick=()=>show(t.dataset.tab));
+  // 실전 문제 → 관련 개념: 개념 탭 전환 + 해당 단계로 스크롤 릴레이
+  window.addEventListener('message',function(e){
+    const d=e.data; if(!d||d.sxd!=='goConcept'||!d.stage) return;
+    show('concept');
+    const f=frames.concept;
+    const relay=()=>{ try{ f.contentWindow.postMessage({sxd:'scrollToStage',stage:d.stage},'*'); }catch(_){} };
+    if(loaded.concept==='done') setTimeout(relay,90); else f.addEventListener('load',()=>setTimeout(relay,150),{once:true});
+  });
   let init='home'; try{init=localStorage.getItem('sxd_tab')||'home'}catch(e){}
   show(init);
   (function(){const d=dday();document.getElementById('dd').textContent=d>0?('실기 D-'+d):(d===0?'실기 D-DAY':'실기');})();

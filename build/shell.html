@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="googlebot" content="noindex, nofollow">
+<title>서비스·경험디자인 기사 · 실기 올인원</title>
+<style>
+  :root{--blue:#2272eb;--blue2:#3182f6;--t1:#191f28;--t2:#4e5968;--t3:#8b95a1;--line:#e5e8eb;--card:#fff;
+    --teal:#0ca678;--amber:#e08600;--violet:#7048e8;--band:#eef1f4;}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:"Pretendard",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:#dfe4ea;overflow:hidden;word-break:keep-all}
+  .appbar{position:sticky;top:0;height:52px;background:var(--blue);display:flex;align-items:center;gap:12px;padding:0 max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left));box-shadow:0 2px 14px rgba(21,83,182,.32);z-index:10}
+  .brand{color:#fff;font-weight:800;font-size:15px;white-space:nowrap;letter-spacing:-.02em}
+  .brand span{color:#cfe0ff}
+  .tabs{display:flex;gap:6px}
+  .tabs button{border:0;background:rgba(255,255,255,.16);color:#fff;font-family:inherit;font-weight:700;font-size:13.5px;padding:8px 14px;border-radius:10px;cursor:pointer;transition:.12s;white-space:nowrap}
+  .tabs button:hover{background:rgba(255,255,255,.28)}
+  .tabs button.on{background:#fff;color:var(--blue);box-shadow:0 2px 8px rgba(0,0,0,.14)}
+  .tabs button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  .dd{margin-left:auto;color:#fff;font-weight:800;font-size:12.5px;background:rgba(255,255,255,.2);padding:6px 12px;border-radius:999px;white-space:nowrap}
+  .stage{position:relative;height:calc(100vh - 52px);height:calc(100dvh - 52px)}
+  .stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:none;background:var(--band)}
+  .stage iframe.show{display:block}
+  .loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:14px;font-weight:600}
+  /* home */
+  #home{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--band);display:none;padding:22px max(18px,env(safe-area-inset-right)) calc(60px + env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left))}
+  #home.show{display:block}
+  .home-in{max-width:820px;margin:0 auto}
+  .hz{background:linear-gradient(135deg,#3182f6,#2272eb);border-radius:20px;padding:22px 24px;color:#fff;box-shadow:0 8px 24px rgba(21,83,182,.28)}
+  .hz h1{margin:0;font-size:clamp(20px,4vw,26px);font-weight:800;letter-spacing:-.02em}
+  .hz p{margin:6px 0 0;font-size:13.5px;color:#e6efff}
+  .hz .ddbig{margin-top:14px;display:inline-flex;align-items:baseline;gap:8px;background:rgba(255,255,255,.16);padding:8px 16px;border-radius:14px}
+  .hz .ddbig b{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums} .hz .ddbig span{font-size:13px;color:#e6efff}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+  @media(max-width:640px){.cards{grid-template-columns:1fr}}
+  .mc{background:var(--card);border-radius:16px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 14px rgba(0,0,0,.05);cursor:pointer;transition:.12s;border:0;text-align:left;font-family:inherit}
+  .mc:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.09)}
+  .mc .ic{font-size:20px} .mc h3{margin:6px 0 2px;font-size:15px;font-weight:800}
+  .mc .big{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .mc .big i{font-size:14px;color:var(--t3);font-weight:700;font-style:normal}
+  .mc .sub{font-size:12px;color:var(--t2);margin-top:3px;font-weight:600}
+  .mc .track{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:10px}
+  .mc .track>i{display:block;height:100%;border-radius:99px;transition:width .5s}
+  .mc.c1 .track>i{background:var(--blue2)} .mc.c2 .track>i{background:var(--teal)} .mc.c3 .track>i{background:var(--amber)}
+  .mc .go{margin-top:11px;font-size:12px;font-weight:800;color:var(--blue)}
+  .hrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center}
+  .hbtn{border:1.5px solid var(--line);background:var(--card);color:var(--t2);font-family:inherit;font-weight:700;font-size:12.5px;padding:9px 14px;border-radius:11px;cursor:pointer}
+  .hbtn:hover{border-color:#c8ced4;color:var(--t1)}
+  .htip{font-size:12px;color:var(--t3);margin-top:14px;line-height:1.6}
+  @media(max-width:600px){.appbar{gap:8px;padding:0 10px} .brand span{display:none} .tabs button{padding:8px 11px;font-size:12.5px} .tl{display:none} .dd{display:none}}
+  @media(max-width:380px){ .brand{display:none} }
+  @media(max-height:480px){ .appbar{height:44px} .stage{height:calc(100vh - 44px);height:calc(100dvh - 44px)} }
+</style>
+</head>
+<body>
+<header class="appbar">
+  <div class="brand">서경디<span> · 실기 올인원</span></div>
+  <nav class="tabs" role="tablist" aria-label="학습 도구">
+    <button data-tab="home" class="on" aria-selected="true">🏠 <span class="tl">현황</span></button>
+    <button data-tab="concept" aria-selected="false">📚 개념<span class="tl"> 대시보드</span></button>
+    <button data-tab="problem" aria-selected="false">✍️ <span class="tl">실전 </span>문제</button>
+    <button data-tab="drill" aria-selected="false">⚡ 암기<span class="tl"> 드릴</span></button>
+  </nav>
+  <div class="dd" id="dd">실기</div>
+</header>
+<div class="stage">
+  <div class="loading" id="loading" style="display:none">불러오는 중…</div>
+  <noscript><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:28px;text-align:center;color:#4e5968;font-size:15px;line-height:1.7">
+    ⚠️ 이 학습 도구는 <b style="color:#191f28">자바스크립트</b>가 필요해요.<br>
+    지금은 콘텐츠가 표시되지 않는 환경입니다(예: 아이폰·아이패드 <b>‘파일’ 앱 미리보기</b>).<br><br>
+    👉 <b style="color:#2272eb">Safari 등 정식 브라우저</b>로 열어 주세요.
+  </div></noscript>
+  <div id="home" class="show"></div>
+  <iframe id="fr-concept" data-srcdoc="__SRC_CONCEPT__" title="개념 대시보드"></iframe>
+  <iframe id="fr-problem" data-srcdoc="__SRC_PROBLEM__" title="실전 문제"></iframe>
+  <iframe id="fr-drill" data-srcdoc="__SRC_DRILL__" title="암기 드릴"></iframe>
+</div>
+<script>
+  const TOT={concept:281,problem:78,drill:50};
+  const frames={concept:document.getElementById('fr-concept'),problem:document.getElementById('fr-problem'),drill:document.getElementById('fr-drill')};
+  const homeEl=document.getElementById('home'), loadingEl=document.getElementById('loading');
+  const tabs=[...document.querySelectorAll('.tabs button')];
+  const loaded={};
+  function dday(){try{var ex=new Date(2026,6,25),n=new Date();return Math.ceil((ex-new Date(n.getFullYear(),n.getMonth(),n.getDate()))/864e5);}catch(e){return null}}
+  function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'{}')}catch(e){return{}}}
+  function stats(){
+    const dash=lsGet('sxd_dash_v1'); const cst=dash.states||{}, cmk=dash.marks||{};
+    const cKnown=Object.values(cst).filter(v=>v==='known').length, cRev=Object.values(cst).filter(v=>v==='review').length, cMk=Object.keys(cmk).length;
+    const prob=lsGet('sxd_problems_v1'); const pv=Object.values(prob);
+    const pGraded=pv.filter(v=>v&&v.grade).length, pOk=pv.filter(v=>v&&v.grade==='ok').length, pPart=pv.filter(v=>v&&v.grade==='part').length, pNo=pv.filter(v=>v&&v.grade==='no').length;
+    const pPts=pOk+pPart*0.5;
+    const dr=lsGet('seogyeongdi_drill_v1'); const dKnown=Object.values(dr).filter(v=>v==='know').length, dAgain=Object.values(dr).filter(v=>v==='again').length;
+    return {cKnown,cRev,cMk,pGraded,pOk,pPart,pNo,pPts,dKnown,dAgain};
+  }
+  function renderHome(){
+    const s=stats(); const d=dday();
+    const cPct=Math.round(s.cKnown/TOT.concept*100), pPct=Math.round(s.pGraded/TOT.problem*100), dPct=Math.round(s.dKnown/TOT.drill*100);
+    const acc=s.pGraded?Math.round(s.pPts/s.pGraded*100):0;
+    homeEl.innerHTML=`<div class="home-in">
+      <div class="hz"><h1>서비스·경험디자인 기사 · 실기</h1>
+        <p>개념 이해 → 문제 풀이 → 오답 암기. 아래에서 진도를 한눈에 보고 이어서 학습하세요.</p>
+        <div class="ddbig"><b>${d>0?('D-'+d):(d===0?'D-DAY':'종료')}</b><span>시험 2026.07.25</span></div>
+      </div>
+      <div class="cards">
+        <button class="mc c1" data-go="concept"><div class="ic">📚</div><h3>개념 이해</h3>
+          <div class="big">${s.cKnown}<i> / ${TOT.concept}</i></div><div class="sub">✓이해 ${s.cKnown} · ↻복습 ${s.cRev} · ★${s.cMk}</div>
+          <div class="track"><i style="width:${cPct}%"></i></div><div class="go">개념 대시보드 열기 →</div></button>
+        <button class="mc c2" data-go="problem"><div class="ic">✍️</div><h3>문제 풀이</h3>
+          <div class="big">${s.pGraded}<i> / ${TOT.problem}</i></div><div class="sub">채점 정답률 ${acc}% · ✗오답 ${s.pNo} · △부분 ${s.pPart}</div>
+          <div class="track"><i style="width:${pPct}%"></i></div><div class="go">실전 문제 풀기 →</div></button>
+        <button class="mc c3" data-go="drill"><div class="ic">⚡</div><h3>암기 숙지</h3>
+          <div class="big">${s.dKnown}<i> / ${TOT.drill}</i></div><div class="sub">✓알아 ${s.dKnown} · ↻다시 ${s.dAgain}</div>
+          <div class="track"><i style="width:${dPct}%"></i></div><div class="go">암기 드릴 하기 →</div></button>
+      </div>
+      <div class="hrow">
+        <button class="hbtn" id="h-export">⬇️ 진도 백업(내보내기)</button>
+        <button class="hbtn" id="h-import">⬆️ 진도 불러오기</button>
+        <button class="hbtn" id="h-reset">전체 진도 초기화</button>
+      </div>
+      <div class="htip">💡 진도는 이 브라우저에만 저장돼요(캐시 삭제·기기 이동 시 사라짐). 중요하면 <b>진도 백업</b>으로 파일을 받아 두세요. ✗오답·△부분 문제는 문제 탭에서 <b>암기드릴로 전송</b>해 반복 암기할 수 있어요.</div>
+    </div>`;
+    homeEl.querySelectorAll('.mc').forEach(b=>b.onclick=()=>show(b.dataset.go));
+    document.getElementById('h-export').onclick=exportProgress;
+    document.getElementById('h-import').onclick=importProgress;
+    document.getElementById('h-reset').onclick=()=>{ if(confirm('개념·문제·암기 진도를 모두 지울까요? (되돌릴 수 없어요)')){['sxd_dash_v1','sxd_problems_v1','seogyeongdi_drill_v1','sxd_drill_extra'].forEach(k=>localStorage.removeItem(k)); location.reload(); } };
+  }
+  function exportProgress(){
+    const dump={_app:'seogyeongdi',_date:new Date().toISOString()};
+    ['sxd_dash_v1','sxd_problems_v1','seogyeongdi_drill_v1','sxd_drill_extra'].forEach(k=>{const v=localStorage.getItem(k); if(v)dump[k]=v;});
+    const blob=new Blob([JSON.stringify(dump,null,1)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='서경디_실기_진도백업.json'; a.click();
+  }
+  function importProgress(){
+    const inp=document.createElement('input'); inp.type='file'; inp.accept='.json,application/json';
+    inp.onchange=()=>{ const f=inp.files[0]; if(!f)return; const r=new FileReader();
+      r.onload=()=>{ try{ const o=JSON.parse(r.result); ['sxd_dash_v1','sxd_problems_v1','seogyeongdi_drill_v1','sxd_drill_extra'].forEach(k=>{if(o[k])localStorage.setItem(k,o[k]);}); alert('진도를 불러왔어요. 각 탭을 새로고침하면 반영됩니다.'); renderHome(); }catch(e){ alert('파일을 읽지 못했어요.'); } };
+      r.readAsText(f); };
+    inp.click();
+  }
+  function show(k){
+    if(k!=='home'&&!frames[k])k='home';
+    tabs.forEach(t=>{const on=t.dataset.tab===k;t.classList.toggle('on',on);t.setAttribute('aria-selected',on?'true':'false');});
+    homeEl.classList.toggle('show',k==='home');
+    Object.keys(frames).forEach(x=>frames[x].classList.toggle('show',x===k));
+    if(k==='home'){ renderHome(); loadingEl.style.display='none'; }
+    else if(!loaded[k]){ loadingEl.style.display='flex'; const f=frames[k]; f.srcdoc=f.getAttribute('data-srcdoc'); f.removeAttribute('data-srcdoc'); loaded[k]='loading'; f.addEventListener('load',()=>{loaded[k]='done'; if(f.classList.contains('show'))loadingEl.style.display='none';},{once:true}); }
+    else loadingEl.style.display=(loaded[k]==='done')?'none':'flex';
+    try{localStorage.setItem('sxd_tab',k)}catch(e){}
+  }
+  tabs.forEach(t=>t.onclick=()=>show(t.dataset.tab));
+  // 실전 문제 → 관련 개념: 개념 탭 전환 + 해당 단계로 스크롤 릴레이
+  window.addEventListener('message',function(e){
+    const d=e.data; if(!d||d.sxd!=='goConcept'||!d.stage) return;
+    show('concept');
+    const f=frames.concept;
+    const relay=()=>{ try{ f.contentWindow.postMessage({sxd:'scrollToStage',stage:d.stage},'*'); }catch(_){} };
+    if(loaded.concept==='done') setTimeout(relay,90); else f.addEventListener('load',()=>setTimeout(relay,150),{once:true});
+  });
+  let init='home'; try{init=localStorage.getItem('sxd_tab')||'home'}catch(e){}
+  show(init);
+  (function(){const d=dday();document.getElementById('dd').textContent=d>0?('실기 D-'+d):(d===0?'실기 D-DAY':'실기');})();
+</script>
+<script>
+  /* iOS 하드닝: dvh/vh가 0으로 잡혀 콘텐츠 영역이 접히는 문제 방지 — 실제 픽셀 높이로 stage 고정 */
+  (function(){
+    function fit(){
+      var bar=document.querySelector('.appbar'), stage=document.querySelector('.stage');
+      if(!stage)return;
+      var vh=(window.visualViewport&&window.visualViewport.height)||window.innerHeight||document.documentElement.clientHeight;
+      var bh=bar?Math.round(bar.getBoundingClientRect().height):52;
+      stage.style.height=Math.max(0,Math.round(vh-bh))+'px';
+    }
+    fit();
+    window.addEventListener('resize',fit);
+    window.addEventListener('orientationchange',function(){setTimeout(fit,80);});
+    if(window.visualViewport)window.visualViewport.addEventListener('resize',fit);
+    window.addEventListener('load',fit);
+  })();
+</script>
+</body>
+</html>

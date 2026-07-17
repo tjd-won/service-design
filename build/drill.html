@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>서경디 실기 · 빈출 개념 암기 드릴</title>
+<style>
+  :root{
+    --bg:#f2f4f6; --card:#ffffff; --band:#f7f8fa;
+    --t1:#191f28; --t2:#4e5968; --t3:#8b95a1;
+    --line:#e5e8eb; --line2:#d1d6db;
+    --blue:#3182f6; --blue-dk:#2272eb; --blue-soft:#ebf3ff;
+    --good:#12b886; --good-dk:#0ca678; --good-soft:#e6f9f2;
+    --mark:#e94b4b; --mark-soft:#fdeeee;
+    --amber:#f59f00; --amber-soft:#fff9db;
+    --sans:"Pretendard",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    --sh:0 1px 3px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);
+    --sh-lg:0 2px 6px rgba(0,0,0,.05),0 16px 40px rgba(0,0,0,.10);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--t1);font-family:var(--sans);
+    line-height:1.6;-webkit-font-smoothing:antialiased;letter-spacing:-.01em;
+    word-break:keep-all;overflow-wrap:break-word}
+  .wrap{max-width:640px;margin:0 auto;padding:0 16px calc(28px + env(safe-area-inset-bottom))}
+
+  header{position:sticky;top:0;z-index:20;background:var(--blue);
+    box-shadow:0 2px 14px rgba(21,83,182,.28)}
+  .hd{max-width:640px;margin:0 auto;padding:11px 16px;display:flex;align-items:center;gap:10px}
+  .hd .logo{font-weight:800;font-size:16px;color:#fff;letter-spacing:-.02em;white-space:nowrap}
+  .hd .logo span{color:#cfe0ff}
+  body.embedded .hd .logo{display:none}
+  .btn:focus-visible,.tool:focus-visible,.navbtn:focus-visible,.chip:focus-visible,.flash:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+  @media(prefers-reduced-motion:reduce){.flash{transition:none!important} *{scroll-behavior:auto!important}}
+  @media(max-height:480px){.flash{min-height:200px} .face{padding:16px 18px} .q{font-size:20px} .a{font-size:16px}}
+  .hd .prog{margin-left:auto;font-size:12.5px;font-weight:700;color:#eaf1fb;
+    font-variant-numeric:tabular-nums;white-space:nowrap}
+
+  /* progress bar */
+  .bar{height:4px;background:rgba(255,255,255,.25)}
+  .bar>i{display:block;height:100%;background:#fff;width:0;transition:width .35s cubic-bezier(.4,0,.2,1)}
+
+  /* filters */
+  .filters{display:flex;gap:7px;overflow-x:auto;padding:14px 2px 4px;scrollbar-width:none}
+  .filters::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;font-size:13px;font-weight:700;padding:8px 13px;border-radius:999px;
+    background:var(--card);color:var(--t2);border:1.5px solid var(--line);cursor:pointer;
+    transition:.13s;white-space:nowrap}
+  .chip .n{font-size:11px;color:var(--t3);margin-left:4px;font-weight:600}
+  .chip:hover{border-color:var(--line2)}
+  .chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .chip.on .n{color:#cfe0ff}
+
+  /* stat pills */
+  .stats{display:flex;gap:8px;margin:12px 2px 6px}
+  .stat{flex:1;background:var(--card);border-radius:13px;padding:10px 12px;box-shadow:var(--sh);text-align:center}
+  .stat .k{font-size:11px;color:var(--t3);font-weight:600}
+  .stat .v{font-size:20px;font-weight:800;margin-top:1px;font-variant-numeric:tabular-nums}
+  .stat.g .v{color:var(--good-dk)} .stat.r .v{color:var(--mark)} .stat.b .v{color:var(--blue)}
+
+  /* card */
+  .stage{margin-top:14px;perspective:1600px}
+  .flash{position:relative;width:100%;min-height:340px;cursor:pointer;
+    transition:transform .5s cubic-bezier(.4,.05,.2,1);transform-style:preserve-3d}
+  .flash.flip{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    background:var(--card);border-radius:22px;box-shadow:var(--sh-lg);
+    padding:26px 24px;display:flex;flex-direction:column}
+  .face.back{transform:rotateY(180deg);background:linear-gradient(180deg,#fbfdff,#f4f8ff)}
+  .meta{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+  .cat{font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:999px;background:var(--blue-soft);color:var(--blue-dk)}
+  .must{background:var(--amber-soft);color:#a15c14}
+  .idx{margin-left:auto;font-size:12px;color:var(--t3);font-weight:700;font-variant-numeric:tabular-nums}
+  .side{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--t3);text-transform:uppercase}
+  .q{font-size:23px;font-weight:800;letter-spacing:-.02em;line-height:1.42;flex:1;display:flex;align-items:center;justify-content:center}
+  .a{font-size:18px;font-weight:600;line-height:1.62;flex:1;display:flex;align-items:center;justify-content:center;color:#12341f}
+  .ct{width:100%;text-align:center;word-break:keep-all;overflow-wrap:break-word}
+  .a b{color:var(--good-dk);font-weight:800;background:linear-gradient(transparent 58%,#c7f0dd 0);padding:0 1px}
+  .q b{background:linear-gradient(transparent 58%,#d6e7ff 0);padding:0 1px}
+  .hint{margin-top:12px;font-size:13.5px;color:var(--t2);background:var(--amber-soft);
+    padding:10px 13px;border-radius:12px;line-height:1.5}
+  .hint b{color:#a15c14}
+  .flip-hint{margin-top:14px;font-size:12.5px;color:var(--t3);text-align:center}
+
+  /* navigation */
+  .nav{display:flex;gap:10px;margin-top:14px;align-items:center}
+  .navbtn{flex:1;border:1.5px solid var(--line);background:var(--card);color:var(--t2);
+    border-radius:14px;padding:13px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;transition:.12s}
+  .navbtn:hover:not(:disabled){border-color:var(--line2);color:var(--t1)}
+  .navbtn:active:not(:disabled){transform:translateY(1px)}
+  .navbtn:disabled{opacity:.35;cursor:default}
+  .navpos{flex:0 0 auto;min-width:56px;text-align:center;font-size:13px;font-weight:800;color:var(--t3);font-variant-numeric:tabular-nums}
+
+  /* actions */
+  .acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .btn{border:none;border-radius:15px;padding:15px;font-size:16px;font-weight:800;font-family:inherit;
+    cursor:pointer;transition:.12s;letter-spacing:-.01em}
+  .btn:active{transform:translateY(1px)}
+  .btn.again{background:var(--mark-soft);color:var(--mark)}
+  .btn.again:hover{background:#fbe0e0}
+  .btn.know{background:var(--good-soft);color:var(--good-dk)}
+  .btn.know:hover{background:#d4f5e7}
+  .btn:disabled{opacity:.4;cursor:default}
+
+  .tools{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;justify-content:center}
+  .tool{font-size:13px;font-weight:700;color:var(--t2);background:var(--card);
+    border:1.5px solid var(--line);border-radius:11px;padding:9px 14px;cursor:pointer;transition:.12s}
+  .tool:hover{border-color:var(--line2);color:var(--t1)}
+  .tool.act{background:var(--blue-soft);border-color:#bcd9ff;color:var(--blue-dk)}
+
+  .done{background:var(--card);border-radius:22px;box-shadow:var(--sh-lg);padding:38px 26px;text-align:center;margin-top:14px}
+  .done h2{margin:0 0 6px;font-size:24px;font-weight:800}
+  .done p{color:var(--t2);margin:0 0 20px}
+  .done .big{font-size:44px;font-weight:800;color:var(--blue);font-variant-numeric:tabular-nums}
+  .kbd{display:none;margin-top:16px;font-size:12px;color:var(--t3);text-align:center;line-height:1.9}
+  .kbd kbd{background:var(--card);border:1px solid var(--line2);border-bottom-width:2px;border-radius:6px;
+    padding:1px 7px;font-family:var(--sans);font-weight:700;font-size:11.5px;color:var(--t2)}
+  @media(hover:hover) and (min-width:600px){.kbd{display:block}}
+  .foot{text-align:center;color:var(--t3);font-size:12px;margin-top:22px;line-height:1.7}
+  .foot a{color:var(--blue);text-decoration:none;font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <div class="hd">
+    <div class="logo">서경디 <span>암기드릴</span></div>
+    <div class="prog" id="prog">0 / 0</div>
+  </div>
+  <div class="bar"><i id="barfill"></i></div>
+</header>
+
+<div class="wrap">
+  <div class="filters" id="filters"></div>
+
+  <div class="stats">
+    <div class="stat b"><div class="k">남은 카드</div><div class="v" id="s-left">0</div></div>
+    <div class="stat g"><div class="k">✓ 알아</div><div class="v" id="s-know">0</div></div>
+    <div class="stat r"><div class="k">↻ 다시</div><div class="v" id="s-again">0</div></div>
+  </div>
+
+  <div id="main"></div>
+
+  <div class="tools">
+    <button class="tool" id="t-shuffle">🔀 섞기</button>
+    <button class="tool" id="t-again">↻ 다시볼 카드만</button>
+    <button class="tool" id="t-flipdir">↔ 방향 바꾸기</button>
+    <button class="tool" id="t-reset">↺ 진도 초기화</button>
+  </div>
+
+  <div class="kbd">
+    <kbd>Space</kbd> 뒤집기 · <kbd>←</kbd> 이전 · <kbd>→</kbd> 다음 · <kbd>1</kbd> 다시 · <kbd>2</kbd> 알아
+  </div>
+  <div class="foot">
+    50개 빈출 카드 · 실제 기출(2020–22)·이론서 기반<br>
+    개념은 <b>개념 대시보드</b> 탭, 문제는 <b>실전 문제</b> 탭에서 · 오답을 이 드릴로 보내 반복 암기하세요
+  </div>
+</div>
+
+<script>
+/* ===== 카드 데이터: 실제 기출 + 이론서 기반 빈출 50 ===== */
+const CARDS = [
+ // MUST 5종
+ {c:"MUST",q:"SERVQUAL 서비스 품질 <b>5차원</b>은?",a:"<b>신뢰성·확신성·유형성·공감성·반응성</b> (반·확·유·공·신)",h:"정확=신뢰 / 믿음=확신 / 눈에 보임=유형 / 개별 배려=공감 / 신속=반응"},
+ {c:"MUST",q:"<b>RFP</b>와 <b>RFI</b>의 차이는?",a:"RFP=<b>제안요청서</b>(발주처가 과업·평가기준 정리해 제안서 요청) / RFI=<b>정보요청서</b>(제안 전 정보 요청, 발주·제안자 <b>양방향</b>)"},
+ {c:"MUST",q:"<b>친화도맵</b>(Affinity Diagram)이란?",a:"흩어진 발화·데이터를 <b>유사 주제끼리 묶고</b> 상위 카테고리를 명명하는 <b>상향식</b> 인사이트 구조화"},
+ {c:"MUST",q:"서비스 블루프린트 <b>3개 경계선</b>을 위→아래 순서로?",a:"<b>상호작용선</b> → <b>가시선</b> → <b>내부 상호작용선</b>",h:"고객행동↔전방=상호작용선 / 전방↔후방=가시선 / 후방↔지원=내부상호작용선"},
+ {c:"MUST",q:"<b>고객여정지도(CJM)</b> 세로축 구성요소는?",a:"단계·생각·행동·<b>감정(감정곡선)</b>·<b>서비스 접점(터치포인트)</b>·강점/약점·기회영역"},
+
+ // 조사·리서치
+ {c:"조사",q:"<b>섀도잉</b>(Shadowing)이란?",a:"개입 없이 <b>그림자처럼 따라다니며</b> 행동·감정·환경 상호작용을 관찰(참여관찰 대표)"},
+ {c:"조사",q:"<b>컬처럴 프로브</b>(Cultural Probe)란?",a:"지도·엽서·카메라·다이어리 등 <b>제시물 키트</b>를 주어 사용자가 일상 경험을 <b>스스로 기록</b>"},
+ {c:"조사",q:"<b>다이어리 연구</b>(Diary Study)란?",a:"일정 기간 <b>일기 형식으로 종단(추적) 기록</b>. 관찰자 없는 사적 순간까지 포착"},
+ {c:"조사",q:"<b>행위 매핑</b>(Behavior Mapping)이란?",a:"<b>특정 시간·특정 환경</b>에서 행동을 관찰·기록(동선·체류). 예: 공원 동선 비디오 기록"},
+ {c:"조사",q:"<b>서비스 사파리</b>(Service Safari)란?",a:"조사자가 현장에서 서비스를 <b>직접 체험</b>하며 공통 요구·문제 발견. <b>체험자+관찰자 2인 1조</b>"},
+ {c:"조사",q:"<b>미스터리 쇼핑</b> vs <b>미스터리 워킹</b>?",a:"쇼핑=<b>고객으로 위장</b>해 조사 / 워킹=<b>직원으로 위장</b>해 조사. 둘 다 개입에 따른 <b>편향</b> 우려"},
+ {c:"조사",q:"<b>인지적 시찰법</b>(Cognitive Walkthrough)이란?",a:"프로세스·제품·서비스를 <b>사용자가 쉽게 인지·사용</b>하는지 단계별 점검·평가"},
+ {c:"조사",q:"<b>정성조사</b> vs <b>정량조사</b>?",a:"정성=<b>'왜'·맥락</b>(인터뷰·FGI·관찰) / 정량=<b>'얼마나'·통계</b>(설문·로그)"},
+ {c:"조사",q:"<b>파일럿 테스트</b>를 먼저 하는 이유는?",a:"본조사 전 <b>질문 오류·흐름·소요시간</b>을 점검·보완 → <b>신뢰도·타당도</b> 확보 (자료는 최종분석용 X)"},
+ {c:"조사",q:"<b>FGI</b>의 적정 인원과 특징은?",a:"<b>6~12명</b>, 숙련 진행자가 이끄는 집단 인터뷰. 집단 상호작용 강점, <b>빅마우스 편향</b> 주의"},
+ {c:"조사",q:"<b>IRB</b>(기관생명윤리위원회)란?",a:"사람 대상 연구를 <b>사전 심의</b>하는 기구(면접조사 설계 단계 검토)"},
+ {c:"조사",q:"조사 윤리 <b>4원칙</b>은?",a:"①고지된 동의 ②자발성(중도 철회 자유) ③익명성·기밀 ④무해성"},
+ {c:"조사",q:"<b>거시환경</b> vs <b>미시환경</b>?",a:"거시=<b>PEST</b> 등 통제 불가한 외부 흐름 / 미시=고객·공급자·이해관계자 등 <b>직접 상호작용</b> 요인"},
+ {c:"조사",q:"<b>PEST</b> 분석의 4요소는?",a:"<b>정치(P)·경제(E)·사회(S)·기술(T)</b> — 통제 불가 거시 외부환경"},
+ {c:"조사",q:"<b>SWOT</b> 분석의 4요소는?",a:"내부 <b>강점(S)·약점(W)</b> + 외부 <b>기회(O)·위협(T)</b>. 내외부 동시 파악 → SO·ST·WO·WT 전략"},
+
+ // 분석·전략
+ {c:"분석",q:"<b>페르소나</b> 도출의 <b>1단계</b>는?",a:"<b>행동변수(behavioral variables) 파악</b>(쿠퍼) — 동기·목표·태도·사용빈도 등 유형화"},
+ {c:"분석",q:"페르소나 구성요소 <b>3분류</b>는?",a:"①인구통계학적 ②심리학적 ③<b>행태적(Behavioral)</b>. '거주지'는 행동특성 아님(함정)"},
+ {c:"분석",q:"<b>이해관계자맵</b>이란?",a:"관계자를 선별해 <b>관계·역할·요구</b>를 시각화(핵심-직접-간접 동심원). 단절·연계 시사점 도출"},
+ {c:"분석",q:"<b>5 Whys</b> 기법이 찾는 것은?",a:"'왜?'를 반복해 <b>근본원인(Root Cause)</b>에 도달"},
+ {c:"분석",q:"<b>HMW</b>(How Might We)란?",a:'"<b>우리가 어떻게 하면 ~할 수 있을까?</b>"로 문제를 기회로 재정의(개방형·해결책 미리 단정 X)'},
+
+ // 아이데이션·프로토타입
+ {c:"아이디어",q:"<b>퍼실리테이터</b>의 올바른 역할은?",a:"<b>중립적으로 과정 진행</b>·발상 자극, 결정권은 <b>참가자</b>에게. 위계로 특정 의견 우선 X, 상황에 유연"},
+ {c:"아이디어",q:"<b>더블다이아몬드</b> 4단계는?",a:"<b>발견 → 정의 → 발전 → 전달</b>(확산·수렴 2회). 문헌조사=발견 단계"},
+ {c:"아이디어",q:"<b>오즈의 마법사</b>(Wizard of Oz)란?",a:"미구현 기술을 <b>사람이 배후 조작</b>해 자동 시스템처럼 시뮬레이션(저비용 반응 검증)"},
+ {c:"아이디어",q:"<b>카노(Kano) 모델</b> 5가지 품질요소는?",a:"①매력적 ②일차원적(일원적) ③당연적 ④무관심 ⑤역품질. 시간 지나면 매력적→일차원적→당연적"},
+ {c:"아이디어",q:"<b>페이퍼 프로토타입</b>의 장점은?",a:"빠르고 저렴 · <b>수정·변형 쉬움</b> · 콘셉트/흐름 표현 · 이해관계자와 소통 쉬움 · 경제적"},
+ {c:"아이디어",q:"<b>데스크톱 워크스루</b>(서비스 모형)란?",a:"레고·종이인형 등 <b>축소 모형</b>으로 서비스 환경을 책상 위에 재현, 페르소나로 상호작용 시뮬레이션"},
+ {c:"아이디어",q:"데스크톱 워크스루의 <b>단점</b>은?",a:"실제 <b>스케일감</b> · <b>맥락/몰입감</b> · <b>인터랙션</b> 파악이 어려움"},
+ {c:"아이디어",q:"<b>MVP</b>(최소기능제품)란?",a:"<b>Minimum</b>(최소 자원·핵심기능) + <b>Viable</b>(가치 제시·가설 검증). 만들고→측정→학습 반복"},
+ {c:"아이디어",q:"<b>로우파이</b> vs <b>하이파이</b> 프로토타입?",a:"Lo-fi=<b>초기·다수 검증</b>(빠르고 저렴) / Hi-fi=<b>후기·정밀 검증</b>(실제와 유사)"},
+ {c:"아이디어",q:"<b>터치포인트 매트릭스</b>란?",a:"여정 단계(행)×채널·이해관계자(열) 격자에 접점 배치 → <b>누락·중복·개선지점</b> 파악"},
+
+ // 모델·운영·권리
+ {c:"모델",q:"<b>시나리오 3단계</b>를 순서대로?",a:"①<b>맥락(정황)</b>: 이상적 경험 큰 그림 → ②<b>주요경로</b>: 활용 과정 치밀히 → ③<b>검증(점검)</b>: 문제점 점검"},
+ {c:"모델",q:"<b>스토리보드</b>란?",a:"시나리오를 <b>장면 단위 그림+설명</b>(만화 컷)으로 시각화. 흐름·터치포인트 공유·타당성 검토"},
+ {c:"모델",q:"<b>서비스 로드맵</b>이란?",a:"실행계획을 <b>시간축(단기·중기·장기)</b>에 배열해 우선순위·단계적 실현 시각화"},
+ {c:"모델",q:"<b>아이디어 포트폴리오</b>의 분류 축은?",a:"<b>실현가능성 × 기대효과</b> 2축으로 분류·비교해 우선순위 정리"},
+ {c:"모델",q:"<b>산업재산권 4종</b>은?",a:"<b>특허·실용신안·디자인권·상표권</b>(특허청 등록·심사)"},
+ {c:"모델",q:"<b>BM 특허</b>(영업방법 특허)의 요건은?",a:"<b>사업 아이디어(영업방법)</b> + <b>정보통신기술(IT)</b> 결합 발명"},
+ {c:"모델",q:"<b>헤이그 시스템</b>이란?",a:"<b>하나의 출원</b>으로 여러 나라에 디자인을 출원하는 <b>국제디자인출원</b> 제도"},
+ {c:"모델",q:"<b>저작권</b>은 언제 발생하나?",a:"<b>창작하는 순간 자동 발생</b>(무방식주의) — 등록 불필요"},
+ {c:"모델",q:"<b>TBL</b>(트리플 바텀 라인) 3요소는?",a:"<b>환경·사회·경제</b>(Planet·People·Profit) — 지속가능 디자인 3축"},
+ {c:"모델",q:"<b>BMC</b>(비즈니스 모델 캔버스) 중앙 요소는?",a:"<b>가치 제안(Value Proposition)</b> — 고객에게 주는 핵심 편익"},
+ {c:"모델",q:"<b>사용성 평가(UT)</b> vs <b>휴리스틱 평가</b>?",a:"UT=<b>실사용자</b>가 과업 수행·관찰 / 휴리스틱=<b>전문가</b>가 원칙으로 점검(실사용자 없이, 저비용)"},
+ {c:"모델",q:"<b>닐슨 휴리스틱</b> 대표 원칙 몇 가지?",a:"시스템 상태 가시성 · 현실 세계와 일치 · 사용자 통제/자유 · 일관성 · 오류 예방 · <b>회상보다 재인</b> …(10개)"},
+ {c:"모델",q:"<b>인포그래픽</b>의 인지적 장점은?",a:"직관적 이해 · <b>정보 습득시간 단축</b> · 기억 오래 유지 · 이목 집중 · 효과적 소통·공감"},
+ {c:"모델",q:"자료 <b>폐기</b>/<b>보존</b> 시 협의 대상은?",a:"폐기=<b>클라이언트(이해관계자)와 협의</b> / 보존=<b>보존기간 합의</b> 후 관리"},
+ {c:"모델",q:"<b>간트차트</b>의 단점은?",a:"작업 간 <b>선후·의존관계</b> 표현 약함 · 지연 시 <b>연쇄 영향 갱신</b> 번거로움 → PERT/CPM으로 보완"},
+];
+
+/* ===== 상태 ===== */
+const KEY="seogyeongdi_drill_v1";
+let state = load();
+function load(){ try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}} }
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){} }
+
+let filter="전체";
+let dir="qa";            // qa = 개념→정의(질문먼저) / aq = 정의→개념
+let onlyAgain=false;
+let deck=[];             // 현재 세션 카드 인덱스 배열
+let pos=0;
+let flipped=false;
+
+/* 카테고리 목록 */
+function CATS(){return ["전체",...[...new Set(CARDS.map(c=>c.c))]];}
+
+/* ===== 렌더 ===== */
+const $=s=>document.querySelector(s);
+const filtersEl=$("#filters"), mainEl=$("#main");
+
+function catCount(cat){
+  return CARDS.filter((c,i)=>(cat==="전체"||c.c===cat)).length;
+}
+function buildFilters(){
+  filtersEl.innerHTML="";
+  CATS().forEach(cat=>{
+    const b=document.createElement("button");
+    b.className="chip"+(cat===filter?" on":"");
+    b.innerHTML=cat+`<span class="n">${catCount(cat)}</span>`;
+    b.onclick=()=>{filter=cat;onlyAgain=false;$("#t-again").classList.remove("act");buildDeck();buildFilters();render();};
+    filtersEl.appendChild(b);
+  });
+}
+
+function pool(){
+  let arr=CARDS.map((c,i)=>i).filter(i=> filter==="전체"||CARDS[i].c===filter);
+  if(onlyAgain) arr=arr.filter(i=> (state[i]||"")==="again");
+  return arr;
+}
+function buildDeck(){ deck=pool(); pos=0; flipped=false; }
+
+function render(){
+  const total=deck.length;
+  // stats
+  const known=deck.filter(i=>state[i]==="know").length;
+  const again=deck.filter(i=>state[i]==="again").length;
+  $("#s-left").textContent=Math.max(0,total-pos);
+  $("#s-know").textContent=known;
+  $("#s-again").textContent=again;
+  $("#prog").textContent=`${Math.min(pos+ (pos<total?1:0),total)} / ${total}`;
+  $("#barfill").style.width=(total? (pos/total*100):0)+"%";
+
+  if(total===0){
+    mainEl.innerHTML=`<div class="done"><h2>카드가 없어요</h2><p>${onlyAgain?"'다시' 표시한 카드가 없어요. 잘하고 있어요! 👏":"이 카테고리에 카드가 없어요."}</p><button class="btn know" onclick="resetView()" style="max-width:200px;margin:0 auto">전체 보기</button></div>`;
+    return;
+  }
+  if(pos>=total){
+    mainEl.innerHTML=`<div class="done">
+      <div class="big">${known} / ${total}</div>
+      <h2>한 바퀴 끝! 🎉</h2>
+      <p>✓ 알아 ${known}개 · ↻ 다시 ${again}개</p>
+      <div class="acts" style="max-width:420px;margin:0 auto">
+        ${again>0?`<button class="btn again" onclick="reviewAgain()">↻ 다시볼 ${again}개만</button>`:`<button class="btn again" onclick="reshuffle()">🔀 다시 섞기</button>`}
+        <button class="btn know" onclick="reshuffle()">↻ 처음부터</button>
+      </div></div>`;
+    return;
+  }
+
+  const card=CARDS[deck[pos]];
+  const front = dir==="qa" ? card.q : card.a;
+  const back  = dir==="qa" ? card.a : card.q;
+  const frontLabel = dir==="qa" ? "개념 / 질문" : "정의 · 설명";
+  const backLabel  = dir==="qa" ? "정답" : "이 개념은?";
+  const backCls = dir==="qa" ? "a" : "q";
+  const frontCls = dir==="qa" ? "q" : "a";
+  const isMust=card.c==="MUST";
+  const st=state[deck[pos]];
+  const stPill = st==="know" ? `<span class="cat" style="background:var(--good-soft);color:var(--good-dk)">✓ 알아</span>`
+               : st==="again" ? `<span class="cat" style="background:var(--mark-soft);color:var(--mark)">↻ 다시</span>` : "";
+
+  mainEl.innerHTML=`
+    <div class="stage">
+      <div class="flash${flipped?" flip":""}" id="flash">
+        <div class="face front">
+          <div class="meta"><span class="cat ${isMust?'must':''}">${card.c}</span>${stPill}<span class="side">${frontLabel}</span><span class="idx">${pos+1} / ${total}</span></div>
+          <div class="${frontCls}"><div class="ct">${front}</div></div>
+          <div class="flip-hint">카드를 탭하면 뒤집혀요 ↻</div>
+        </div>
+        <div class="face back">
+          <div class="meta"><span class="cat ${isMust?'must':''}">${card.c}</span>${stPill}<span class="side">${backLabel}</span><span class="idx">${pos+1} / ${total}</span></div>
+          <div class="${backCls}"><div class="ct">${back}</div></div>
+          ${card.h?`<div class="hint"><b>💡 팁</b> ${card.h}</div>`:""}
+        </div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="navbtn" id="n-prev" ${pos===0?"disabled":""}>‹ 이전</button>
+      <span class="navpos">${pos+1} / ${total}</span>
+      <button class="navbtn" id="n-next">다음 ›</button>
+    </div>
+    <div class="acts">
+      <button class="btn again" onclick="mark('again')" ${flipped?"":"disabled"}>↻ 다시</button>
+      <button class="btn know" onclick="mark('know')" ${flipped?"":"disabled"}>✓ 알아</button>
+    </div>`;
+  $("#flash").onclick=()=>{flipped=!flipped;render();};
+  $("#n-prev").onclick=prev;
+  $("#n-next").onclick=next;
+}
+
+function mark(v){
+  if(!flipped) return;
+  state[deck[pos]]=v; save();
+  pos++; flipped=false; render();
+}
+function prev(){ if(pos>0){ pos--; flipped=false; render(); } }
+function next(){ if(pos<deck.length){ pos++; flipped=false; render(); } }
+function reshuffle(){ buildDeck(); shuffle(deck); render(); }
+function reviewAgain(){ onlyAgain=true; $("#t-again").classList.add("act"); buildDeck(); render(); }
+function resetView(){ filter="전체"; onlyAgain=false; $("#t-again").classList.remove("act"); buildFilters(); buildDeck(); render(); }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} }
+
+/* tools */
+$("#t-shuffle").onclick=reshuffle;
+$("#t-again").onclick=()=>{ onlyAgain=!onlyAgain; $("#t-again").classList.toggle("act",onlyAgain); buildDeck(); render(); };
+$("#t-flipdir").onclick=()=>{ dir=dir==="qa"?"aq":"qa"; flipped=false; render(); };
+$("#t-reset").onclick=()=>{ if(confirm("모든 '알아/다시' 진도를 초기화할까요?")){ state={}; save(); buildDeck(); render(); } };
+
+/* keyboard */
+document.addEventListener("keydown",e=>{
+  if(!document.querySelector('#flash')) return;   // 카드 화면일 때만
+  if(e.key===" "){e.preventDefault(); flipped=!flipped; render();}
+  else if(e.key==="ArrowLeft"){e.preventDefault(); prev();}
+  else if(e.key==="ArrowRight"){e.preventDefault(); next();}
+  else if(e.key==="1" && flipped){mark("again");}
+  else if(e.key==="2" && flipped){mark("know");}
+});
+
+/* init */
+try{ if(window.self!==window.top) document.body.classList.add('embedded'); }catch(e){ document.body.classList.add('embedded'); }
+buildFilters(); buildDeck(); render();
+</script>
+</body>
+</html>
