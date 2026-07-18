@@ -159,7 +159,22 @@ let filter='전체', sfilter='all';
 // 상태 유지: iframe 리로드/재초기화돼도 필터·스크롤을 복원(모바일 웹뷰 대응)
 try{const _pf=localStorage.getItem('sxd_prob_filter'); if(_pf)filter=_pf; const _ps=localStorage.getItem('sxd_prob_sfilter'); if(_ps)sfilter=_ps;}catch(e){}
 function saveFilters(){ try{localStorage.setItem('sxd_prob_filter',filter);localStorage.setItem('sxd_prob_sfilter',sfilter);}catch(e){} }
-function restoreScroll(){ let y=0; try{y=parseInt(localStorage.getItem('sxd_prob_scroll')||'0',10)||0;}catch(e){} if(y<=0)return; const go=()=>{const h=document.documentElement,sb=h.style.scrollBehavior;h.style.scrollBehavior='auto';h.scrollTop=y;try{document.body.scrollTop=y;}catch(e){}h.style.scrollBehavior=sb;}; setTimeout(go,60); setTimeout(go,300); setTimeout(go,600); }
+let _restoring=false;
+function restoreScroll(){
+  let y=0; try{y=parseInt(localStorage.getItem('sxd_prob_scroll')||'0',10)||0;}catch(e){}
+  if(y<=30) return; // 상단 근처(리셋 전이값)는 복원 안 함
+  _restoring=true; let tries=0;
+  const go=()=>{
+    const h=document.documentElement, sb=h.style.scrollBehavior; h.style.scrollBehavior='auto';
+    h.scrollTop=y; try{document.body.scrollTop=y;}catch(e){} try{window.scrollTo(0,y);}catch(e){}
+    h.style.scrollBehavior=sb;
+    const cur=h.scrollTop||document.body.scrollTop||0; tries++;
+    // 콘텐츠/도표 레이아웃이 늦게 정착하는 모바일 대비: 목표에 안 닿으면 계속 재시도(최대 ~2초)
+    if(tries<24 && Math.abs(cur-y)>4) setTimeout(go,80);
+    else setTimeout(()=>{_restoring=false;}, 250);
+  };
+  setTimeout(go,30);
+}
 const filtersEl=document.getElementById('filters'), setsEl=document.getElementById('sets');
 const stripHtml=h=>{const d=document.createElement('div');d.innerHTML=h||'';return (d.textContent||'').replace(/\s+/g,' ').trim();};
 function statusOf(si,qi){ return (store[qkey(si,qi)]||{}).grade || 'unmarked'; }
@@ -344,9 +359,10 @@ try{ if(window.self!==window.top) document.body.classList.add('embedded'); }catc
 buildFilters(); render();
 restoreScroll();
 // 스크롤 위치 저장(디바운스)
-(function(){ let _st; addEventListener('scroll',()=>{ clearTimeout(_st); _st=setTimeout(()=>{ try{localStorage.setItem('sxd_prob_scroll', String(document.documentElement.scrollTop||document.body.scrollTop||0));}catch(e){} },160); },{passive:true}); })();
+(function(){ let _st; addEventListener('scroll',()=>{ if(_restoring)return; clearTimeout(_st); _st=setTimeout(()=>{ if(_restoring)return; try{const y=document.documentElement.scrollTop||document.body.scrollTop||0; if(y>30) localStorage.setItem('sxd_prob_scroll', String(y));}catch(e){} },160); },{passive:true}); })();
 // 셸이 탭을 다시 보여줄 때(리로드 없이 스크롤만 초기화되는 웹뷰 대비) 스크롤 복원
 addEventListener('message',function(e){ const d=e.data; if(d&&d.sxd==='shown') restoreScroll(); });
+addEventListener('pageshow',function(){ restoreScroll(); });
 </script>
 </body>
 </html>

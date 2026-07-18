@@ -148,7 +148,7 @@
     if(k==='home'){ renderHome(); loadingEl.style.display='none'; }
     else if(!loaded[k]){ loadingEl.style.display='flex'; const f=frames[k]; f.srcdoc=f.getAttribute('data-srcdoc'); f.removeAttribute('data-srcdoc'); loaded[k]='loading'; f.addEventListener('load',()=>{loaded[k]='done'; if(f.classList.contains('show'))loadingEl.style.display='none';},{once:true}); }
     else loadingEl.style.display=(loaded[k]==='done')?'none':'flex';
-    if(frames[k]&&loaded[k]==='done'){ const fw=frames[k].contentWindow; const ping=()=>{try{fw.postMessage({sxd:'shown'},'*');}catch(_){}}; ping(); setTimeout(ping,240); }
+    if(frames[k]&&loaded[k]==='done'){ const fw=frames[k].contentWindow; const ping=()=>{try{fw.postMessage({sxd:'shown'},'*');}catch(_){}}; ping(); setTimeout(ping,250); setTimeout(ping,800); }
     try{localStorage.setItem('sxd_tab',k)}catch(e){}
   }
   tabs.forEach(t=>t.onclick=()=>show(t.dataset.tab));
