@@ -818,6 +818,10 @@ window.addEventListener('message',function(e){
   .concept-link{border:1.5px solid var(--blue);background:var(--blue-soft);color:var(--blue-dk);cursor:pointer;font-family:inherit;font-weight:800;font-size:13px;padding:8px 13px;border-radius:10px}
   .concept-link:hover{background:#dbeafe}
   .concept-link:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+  #toTop{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;width:46px;height:46px;border-radius:50%;border:0;background:var(--blue);color:#fff;font-size:20px;font-weight:700;line-height:1;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.2);display:none}
+  #toTop.show{display:block}
+  #toTop:hover{background:var(--blue-dk)}
+  #toTop:focus-visible{outline:2px solid var(--blue-dk);outline-offset:2px}
   .concept-nav{position:relative;display:inline-block}
   .concept-nav .concept-link{display:inline-flex;align-items:center;gap:5px;max-width:230px}
   .concept-nav .concept-link .cl-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -870,6 +874,7 @@ window.addEventListener('message',function(e){
   <div class=&quot;totbar&quot; id=&quot;totbar&quot;></div>
   <div class=&quot;sfilters&quot; id=&quot;sfilters&quot;></div>
   <div id=&quot;sets&quot;></div>
+  <button id=&quot;toTop&quot; type=&quot;button&quot; title=&quot;맨 위로&quot; aria-label=&quot;맨 위로&quot;>↑</button>
   <footer>공식 예시문제(Rev2)·2020–22 기출(실기)·재구성 모의고사 종합 · 기출 모범답안은 한국디자인진흥원 공개본, 예시/모의 해설은 학습용</footer>
 </div>
 <script>
@@ -1099,6 +1104,11 @@ restoreScroll();
 // 셸이 탭을 다시 보여줄 때(리로드 없이 스크롤만 초기화되는 웹뷰 대비) 스크롤 복원
 addEventListener('message',function(e){ const d=e.data; if(d&amp;&amp;d.sxd==='shown') restoreScroll(); });
 addEventListener('pageshow',function(){ restoreScroll(); });
+// 맨 위로 버튼
+(function(){ const tt=document.getElementById('toTop'); if(!tt)return;
+  addEventListener('scroll',()=>{ const y=document.documentElement.scrollTop||document.body.scrollTop||0; tt.classList.toggle('show', y>400); },{passive:true});
+  tt.onclick=()=>{ try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){ document.documentElement.scrollTop=0; try{document.body.scrollTop=0;}catch(_){} } };
+})();
 </script>
 </body>
 </html>
