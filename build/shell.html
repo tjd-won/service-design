@@ -146,15 +146,20 @@
     homeEl.classList.toggle('show',k==='home');
     Object.keys(frames).forEach(x=>frames[x].classList.toggle('show',x===k));
     if(k==='home'){ renderHome(); loadingEl.style.display='none'; }
-    else if(!loaded[k]){ loadingEl.style.display='flex'; const f=frames[k]; f.srcdoc=f.getAttribute('data-srcdoc'); f.removeAttribute('data-srcdoc'); loaded[k]='loading'; f.addEventListener('load',()=>{loaded[k]='done'; if(f.classList.contains('show'))loadingEl.style.display='none';},{once:true}); }
+    else if(!loaded[k]){ loadingEl.style.display='flex'; const f=frames[k]; f.srcdoc=seedDoc(f.getAttribute('data-srcdoc')); f.removeAttribute('data-srcdoc'); loaded[k]='loading'; f.addEventListener('load',()=>{loaded[k]='done'; if(f.classList.contains('show'))loadingEl.style.display='none';},{once:true}); }
     else loadingEl.style.display=(loaded[k]==='done')?'none':'flex';
     if(frames[k]&&loaded[k]==='done'){ const fw=frames[k].contentWindow; const ping=()=>{try{fw.postMessage({sxd:'shown'},'*');}catch(_){}}; ping(); setTimeout(ping,250); setTimeout(ping,800); }
     try{localStorage.setItem('sxd_tab',k)}catch(e){}
   }
   tabs.forEach(t=>t.onclick=()=>show(t.dataset.tab));
   // 실전 문제 → 관련 개념: 개념 탭 전환 + 해당 단계로 스크롤 릴레이
+  // 서브앱 진도 영속화: srcdoc(불투명출처) localStorage는 Safari에서 세션 종료 시 폐기됨 → shell(영속 출처)이 저장하고 로드 시 seed 주입
+  const PKEYS=['sxd_dash_v1','sxd_concept_ui_v1','sxd_problems_v1','sxd_prob_filter','sxd_prob_sfilter','sxd_prob_scroll','seogyeongdi_drill_v1','sxd_drill_extra'];
+  function seedDoc(doc){ try{ var s={}; PKEYS.forEach(function(k){var v=localStorage.getItem(k); if(v!=null)s[k]=v;}); var inj='<scr'+'ipt>window.__SXD_SEED__='+JSON.stringify(s).replace(/</g,'\\u003c')+';</scr'+'ipt>'; if(/<head[^>]*>/i.test(doc)) return doc.replace(/<head([^>]*)>/i,'<head$1>'+inj); return inj+doc; }catch(_){ return doc; } }
   window.addEventListener('message',function(e){
-    const d=e.data; if(!d||d.sxd!=='goConcept'||(!d.term&&!d.stage)) return;
+    const d=e.data;
+    if(d&&d.sxd==='persist'&&typeof d.key==='string'){ try{localStorage.setItem(d.key,d.value);}catch(_){} return; }
+    if(!d||d.sxd!=='goConcept'||(!d.term&&!d.stage)) return;
     show('concept');
     const f=frames.concept;
     const msg=d.term?{sxd:'scrollToConcept',term:d.term}:{sxd:'scrollToStage',stage:d.stage};

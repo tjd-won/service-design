@@ -221,9 +221,12 @@ const CARDS = [
 
 /* ===== 상태 ===== */
 const KEY="seogyeongdi_drill_v1";
+/* Safari 등 srcdoc 불투명출처 localStorage 비영속 대응: shell(영속 출처) 경유 저장 */
+try{if(window.__SXD_SEED__){for(var _sk in window.__SXD_SEED__){try{localStorage.setItem(_sk,window.__SXD_SEED__[_sk]);}catch(_e){}}}}catch(_e){}
+function LSset(k,v){try{localStorage.setItem(k,v);}catch(e){}try{parent.postMessage({sxd:'persist',key:k,value:v},'*');}catch(e){}}
 let state = load();
 function load(){ try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}} }
-function save(){ try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){} }
+function save(){ try{LSset(KEY,JSON.stringify(state))}catch(e){} }
 
 let filter="전체";
 let dir="qa";            // qa = 개념→정의(질문먼저) / aq = 정의→개념
